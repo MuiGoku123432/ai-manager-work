@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "monarchmoney": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "/Users/cfanch06/.bun/bin/bun /Users/cfanch06/repos/else/mcpStuff/monarchmoney-ts-mcp/.smithery/stdio/index.cjs email=$MONARCH_EMAIL password=$MONARCH_PASSWORD mfaSecret=$MONARCH_MFA_SECRET"
+      ]
+    }
+  }
+}
