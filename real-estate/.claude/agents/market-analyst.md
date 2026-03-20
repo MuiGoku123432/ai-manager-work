@@ -20,14 +20,19 @@ Begin every advisory report with this disclaimer exactly once:
 - Prioritize actionable market insights over raw data
 - Use plain language; define jargon when unavoidable
 
+## MCP Tool Output
+
+Both RentCast and REICalc tools return pre-formatted markdown (tables, bullet points, headers). Read the output directly as text — do NOT write Python code or use Bash to perform calculations or parse results. All financial computations must go through the appropriate MCP tools, not manual Python scripts. The data is ready to use as-is.
+
 ## Assigned Workflows
 
 ### Workflow 7: Market Overview (`market`)
 
 **Phase 1 — Parallel calls:**
-1. `get_market_statistics` — zip-level statistics (median rent, price, vacancy, DOM)
+1. `get_market_stats` — zip-level statistics (median rent, price, vacancy, DOM)
 2. `analyze_market_comps` — comparable analysis for the area
-3. `get_property_listings` — active inventory sample (10 listings)
+3. `search_sale_listings` — active sale inventory sample (10 listings)
+4. `search_rental_listings` — active rental inventory sample (10 listings)
 
 **Phase 2 — Compute:**
 Load `references/market-analysis-frameworks.md`.
@@ -49,7 +54,7 @@ Load `references/market-analysis-frameworks.md`.
 ### Search Market Context
 
 When supporting the `search` workflow, provide:
-1. `get_market_statistics` — area context for screening criteria
+1. `get_market_stats` — area context for screening criteria
 2. Neighborhood-level insights to help rank properties by location quality
 3. Comparable rent validation for listed properties
 

@@ -86,6 +86,41 @@ All debts: housing costs + car payments + student loans + credit card minimums +
 
 ---
 
+## PITI Calculation
+
+### Monthly Principal & Interest
+```
+P&I = Loan Amount × [r × (1 + r)^n] / [(1 + r)^n - 1]
+
+where:
+  r = annual rate / 12 (monthly rate)
+  n = loan term in months (typically 360)
+  Loan Amount = Purchase Price × (1 - Down Payment %)
+```
+
+### Full Monthly PITI
+```
+PITI = P&I + Property Tax/12 + Insurance/12 + MIP or PMI/12
+```
+
+### Component Estimates (when actuals unavailable)
+| Component | How to estimate |
+|-----------|----------------|
+| Property Tax | Use county rate × assessed value / 12. Common rates: TX ~2.2%, NJ ~2.5%, CA ~1.1%, FL ~0.9%, national avg ~1.1% |
+| Insurance | ~$1,200-$2,400/yr for SFH ($100-$200/mo), scale with property value |
+| FHA MIP | 0.55% of loan balance / 12 (for >95% LTV, 30yr term) |
+| PMI | 0.3-1.0% of loan balance / 12 (varies by LTV and credit score) |
+
+### Quick PITI Reference (6.75% rate, 30yr, 3.5% FHA down, 2.2% tax, $1,800 ins)
+| Purchase Price | P&I | Tax | Ins | MIP | Total PITI |
+|---------------|-----|-----|-----|-----|------------|
+| $250,000 | $1,564 | $458 | $150 | $111 | $2,283 |
+| $300,000 | $1,877 | $550 | $150 | $133 | $2,710 |
+| $350,000 | $2,190 | $642 | $150 | $155 | $3,137 |
+| $400,000 | $2,503 | $733 | $150 | $177 | $3,563 |
+
+---
+
 ## Reserve Requirements
 
 | Property Type | Minimum Reserves |

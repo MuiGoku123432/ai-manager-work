@@ -21,15 +21,19 @@ Begin every advisory report with this disclaimer exactly once:
 - Prioritize recommendations by return metrics (CoC, IRR, cash flow)
 - Use plain language; define jargon when unavoidable
 
+## MCP Tool Output
+
+Both RentCast and REICalc tools return pre-formatted markdown (tables, bullet points, headers). Read the output directly as text — do NOT write Python code or use Bash to perform calculations or parse results. All financial computations (PITI, CoC, IRR, Monte Carlo, sensitivity) must go through REICalc tools, not manual Python scripts. The data is ready to use as-is.
+
 ## Assigned Workflows
 
 ### Workflow 2: Full Analysis — Deep Dive (`analyze`)
 
 **Phase 1 — Parallel calls:**
-1. `get_property_data` — property details
+1. `search_property` — property details
 2. `get_rent_estimate` — rental income
-3. `get_property_valuation` — market value
-4. `get_market_statistics` — area context
+3. `get_value_estimate` — market value
+4. `get_market_stats` — area context
 5. `calculate_cocr` — cash-on-cash return
 6. `calculate_irr` — internal rate of return
 
@@ -44,26 +48,27 @@ Begin every advisory report with this disclaimer exactly once:
 ### Workflow 3: House Hack (`househack`)
 
 **Phase 1 — Parallel calls:**
-1. `get_property_data` — property details and unit count
+1. `search_property` — property details and unit count
 2. `get_rent_estimate` — rental income for non-owner units
-3. `get_property_valuation` — market value
-4. `evaluate_house_hack` — house hack modeling
+3. `get_value_estimate` — market value
+4. `calculate_piti` with `loan_type: "fha"` — exact PITI breakdown (P&I, tax, insurance, MIP)
+5. `evaluate_house_hack` with `loan_type: "fha"` — house hack modeling
 
 **Phase 2 — Financing (parallel):**
 1. `calculate_mortgage_affordability` with FHA (3.5% down)
 2. `calculate_mortgage_affordability` with conventional (5% down)
 3. `analyze_debt_to_income` — DTI impact
 
-**Phase 3 — Compute:** Load `references/house-hacking-strategies.md`.
-Mortgage offset %, FHA self-sufficiency test (3-4 units), post-year-1 scenarios.
+**Phase 3 — Compute:** Load `references/lending-guidelines.md` for MIP rates and PITI reference table. Load `references/house-hacking-strategies.md` for offset scoring.
+Mortgage offset %, FHA self-sufficiency test (3-4 units), post-year-1 scenarios. Use the PITI from `calculate_piti` — do NOT estimate MIP rates manually (current FHA annual MIP is 0.55%, not 0.85%).
 
 **Output:** Offset score, monthly PITI vs rental income, FHA vs conventional, unit-by-unit rents, Year 1 vs Year 2+ projections, exit strategies.
 
 ### Workflow 4: BRRRR (`brrrr`)
 
 **Phase 1 — Parallel calls:**
-1. `get_property_data` — current condition
-2. `get_property_valuation` — current value and ARV
+1. `search_property` — current condition
+2. `get_value_estimate` — current value and ARV
 3. `get_rent_estimate` — post-rehab rent
 4. `analyze_brrrr_deal` — full BRRRR model
 
@@ -78,12 +83,12 @@ Cash left in deal, infinite return check, post-refi CoC.
 ### Workflow 5: Fix and Flip (`flip`)
 
 **Phase 1 — Parallel calls:**
-1. `get_property_data` — current condition
-2. `get_property_valuation` — current value and ARV
+1. `search_property` — current condition
+2. `get_value_estimate` — current value and ARV
 3. `analyze_fix_flip` — flip profitability
 
 **Phase 2 — Market validation:**
-1. `get_market_statistics` — DOM and price trends
+1. `get_market_stats` — DOM and price trends
 
 **Phase 3 — Compute:** Load `references/investment-metrics-benchmarks.md` (flip section).
 MAO (70% rule), holding costs, net profit, ROI.
@@ -94,8 +99,8 @@ MAO (70% rule), holding costs, net profit, ROI.
 
 **Phase 1 — Parallel calls:**
 1. `get_rent_estimate` — rent estimate
-2. `get_property_data` — property details
-3. `get_market_statistics` — rental market
+2. `search_property` — property details
+3. `get_market_stats` — rental market
 4. `calculate_dscr` — debt service coverage
 5. `calculate_cocr` — cash-on-cash return
 
@@ -123,6 +128,7 @@ Pro forma, expense ratio, cap rate, GRM, 5-year projection.
 Load on demand — do NOT load all at startup:
 - `references/investment-metrics-benchmarks.md` — All investment benchmarks (cap rate, CoC, IRR, DSCR, BRRRR, flip)
 - `references/house-hacking-strategies.md` — FHA rules, multi-unit analysis, offset scoring
+- `references/lending-guidelines.md` — PITI formula, MIP/PMI rates, DTI thresholds, state property tax rates
 - `references/workflow-tool-sequences.md` — Exact MCP tool call sequences
 
 ## Standard Report Format
@@ -140,3 +146,4 @@ Load on demand — do NOT load all at startup:
 - If RentCast returns no rent estimate, use market statistics and price/sqft to estimate
 - When multiple strategies apply, model all and let the user choose
 - If property data is incomplete, note gaps and their impact on analysis accuracy
+- When calling `evaluate_house_hack`, always pass `loan_type: "fha"` (or `"conventional"`) so it computes PITI correctly including UFMIP and MIP. Cross-check the tool's PITI output against `calculate_piti` or the Quick PITI Reference table in `references/lending-guidelines.md`.

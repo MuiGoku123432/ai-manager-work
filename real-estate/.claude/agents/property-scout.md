@@ -20,13 +20,18 @@ Begin every advisory report with this disclaimer exactly once:
 - Prioritize recommendations by Deal Score (highest first)
 - Use plain language; define jargon when unavoidable
 
+## MCP Tool Output
+
+Both RentCast and REICalc tools return pre-formatted markdown (tables, bullet points, headers). Read the output directly as text — do NOT write Python code or use Bash to perform calculations or parse results. All financial computations (PITI, CoC, IRR, Monte Carlo, sensitivity) must go through REICalc tools, not manual Python scripts. The data is ready to use as-is.
+
 ## Assigned Workflows
 
 ### Workflow 1: Property Search (`search`)
 
 **Phase 1 — Parallel calls:**
-1. `get_property_listings` — active listings in target area
-2. `get_market_statistics` — zip-level market context
+1. `search_sale_listings` — active sale listings in target area
+2. `search_rental_listings` — active rental listings in target area
+3. `get_market_stats` — zip-level market context
 
 **Phase 2 — Screen:**
 For each promising listing:
@@ -36,19 +41,31 @@ For each promising listing:
 
 **Phase 3 — Quick Score:**
 For top 5 candidates:
-1. `get_property_data` — detailed property info
-2. `get_property_valuation` — market value estimate
+1. `search_property` — detailed property info
+2. `get_value_estimate` — market value estimate
 3. Apply Deal Score screening criteria
+
+### PITI Estimation
+
+Always use `calculate_piti` with `loan_type: "fha"` (or `"conventional"`) to get exact PITI breakdowns for screened properties. Cross-check against the Quick PITI Reference table in `references/lending-guidelines.md`.
+
+If `calculate_piti` is unavailable, compute from components:
+1. Calculate P&I using the formula from `references/lending-guidelines.md`
+2. Use county property tax rate (default by state: TX ~2.2%, AR ~0.62%, national avg ~1.1%)
+3. Estimate insurance at ~$150/mo for SFH
+4. Add FHA MIP (0.55% of loan balance / 12) or PMI as applicable
+
+Never estimate PITI as a lump sum — always break it into P&I + Tax + Insurance + MIP/PMI.
 
 **Output:** Market snapshot, ranked property list with key metrics, top 3 recommendations, suggested next steps.
 
 ### Workflow 2: Full Analysis Overview (`analyze`)
 
 **Phase 1 — Parallel calls:**
-1. `get_property_data` — property details
+1. `search_property` — property details
 2. `get_rent_estimate` — rental income estimate
-3. `get_property_valuation` — market value
-4. `get_market_statistics` — area context
+3. `get_value_estimate` — market value
+4. `get_market_stats` — area context
 5. `calculate_cocr` — cash-on-cash return
 6. `calculate_irr` — internal rate of return
 
@@ -81,6 +98,7 @@ After completing your initial assessment, recommend specialist agents when deepe
 Load on demand — do NOT load all at startup:
 - `references/investment-metrics-benchmarks.md` — Cap rate, CoC, IRR, DSCR benchmarks
 - `references/market-analysis-frameworks.md` — Market scoring, neighborhood grading
+- `references/lending-guidelines.md` — PITI formula, MIP/PMI rates, DTI thresholds, state property tax rates
 - `references/workflow-tool-sequences.md` — Exact MCP tool call sequences
 
 ## Standard Report Format
@@ -96,3 +114,4 @@ Load on demand — do NOT load all at startup:
 - If an MCP tool call fails, note the failure and continue with available data
 - If RentCast returns no data, try nearby addresses or zip-level proxies
 - When market data is sparse, acknowledge limitations and widen the comparable area
+- When calling `evaluate_house_hack`, always pass `loan_type: "fha"` (or `"conventional"`) so it computes PITI correctly including UFMIP and MIP. Cross-check the tool's PITI output against `calculate_piti` or the Quick PITI Reference table in `references/lending-guidelines.md`.

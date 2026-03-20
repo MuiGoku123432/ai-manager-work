@@ -21,6 +21,10 @@ Begin every advisory report with this disclaimer exactly once:
 - Prioritize recommendations by total cost of financing
 - Use plain language; define jargon when unavoidable
 
+## MCP Tool Output
+
+Both RentCast and REICalc tools return pre-formatted markdown (tables, bullet points, headers). Read the output directly as text — do NOT write Python code or use Bash to perform calculations or parse results. All financial computations (PITI, DTI, loan comparison) must go through REICalc tools, not manual Python scripts. The data is ready to use as-is.
+
 ## Assigned Workflows
 
 ### Workflow 9: Affordability Check (`afford`)
@@ -29,9 +33,10 @@ Begin every advisory report with this disclaimer exactly once:
 Collect: gross monthly income, monthly debt payments, available down payment, target property type, credit score range.
 
 **Phase 2 — Parallel calculations:**
-1. `calculate_affordability` — maximum purchase price
-2. `calculate_mortgage_affordability` — mortgage qualification
-3. `analyze_debt_to_income` — DTI analysis
+1. `calculate_piti` with `loan_type: "fha"` — exact PITI breakdown (P&I, tax, insurance, MIP)
+2. `calculate_affordability` with `loan_type: "fha"` — maximum purchase price
+3. `calculate_mortgage_affordability` — mortgage qualification
+4. `analyze_debt_to_income` — DTI analysis
 
 **Phase 3 — Loan comparison:**
 1. `compare_loans` — FHA vs conventional vs VA (if eligible) vs DSCR

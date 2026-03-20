@@ -94,6 +94,14 @@ CoC = Annual Pre-Tax Cash Flow / Total Cash Invested x 100
 ### Formula
 DSCR = Net Operating Income / Annual Debt Service
 
+### NOI Components (what to include)
+NOI = Gross Rent - Vacancy (5-8%) - Property Taxes - Insurance - Maintenance (8-10%) - Property Management (8-10%) - CapEx Reserves (5-8%)
+
+### Debt Service (denominator)
+Annual Debt Service = (Monthly P&I + Monthly MIP/PMI) × 12
+
+Note: Property taxes and insurance are operating expenses (in NOI), NOT part of debt service. PITI is used for DTI and affordability — DSCR uses only P&I + mortgage insurance as debt service.
+
 ### Benchmarks
 | DSCR | Assessment |
 |------|-----------|

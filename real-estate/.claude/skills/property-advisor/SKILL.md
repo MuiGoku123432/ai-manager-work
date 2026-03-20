@@ -69,20 +69,27 @@ Load these on demand as needed — do NOT load all at startup:
 ## MCP Tool Access
 
 ### RentCast (Property Data and Market Intelligence)
-- **get_property_listings**: Search active listings by zip code, city, property type, price range
-- **get_property_data**: Detailed property information (beds, baths, sqft, lot size, year built, tax history)
-- **get_rent_estimate**: Algorithmic rent estimate for a specific property
-- **get_property_valuation**: Estimated market value with comparable sales
-- **get_market_statistics**: Zip-level statistics (median rent, median price, vacancy rate, days on market)
+- **search_sale_listings**: Search active sale listings by city/state or bounding box
+- **search_rental_listings**: Search active rental listings by city/state or bounding box
+- **search_property**: Search property records by address, city, state, or ZIP
+- **get_property_by_id**: Get detailed property record by RentCast ID
+- **get_value_estimate**: Estimated market value (AVM) with comparable sales
+- **get_rent_estimate**: Algorithmic rent estimate for a specific address
+- **get_market_stats**: ZIP-level market statistics (median rent, price, trends)
+- **get_sale_listing_by_id**: Get a single sale listing by listing ID
+- **get_rental_listing_by_id**: Get a single rental listing by listing ID
+- **get_random_properties**: Random property sample (for testing)
+- **ping_rate_limit**: Check remaining API quota
 
 ### REICalc (Investment Calculators)
 - **calculate_cocr**: Cash-on-cash return calculation
 - **calculate_irr**: Internal rate of return over hold period
 - **calculate_dscr**: Debt service coverage ratio
-- **evaluate_house_hack**: House hack strategy modeling with mortgage offset
+- **calculate_piti**: Monthly PITI breakdown (P&I, tax, insurance, MIP/PMI) with FHA UFMIP support
+- **evaluate_house_hack**: House hack strategy modeling with mortgage offset (pass `loan_type: "fha"` or `"conventional"`)
 - **analyze_brrrr_deal**: Full BRRRR analysis with refinance modeling
 - **analyze_fix_flip**: Flip profitability with holding costs
-- **calculate_affordability**: Maximum purchase price given income/debts
+- **calculate_affordability**: Maximum purchase price given income/debts (supports `loan_type: "fha"` or `"conventional"`)
 - **calculate_mortgage_affordability**: Mortgage qualification analysis
 - **analyze_debt_to_income**: DTI calculation and impact assessment
 - **compare_loans**: Side-by-side loan comparison
@@ -106,8 +113,9 @@ Load these on demand as needed — do NOT load all at startup:
 Search and screen properties in an area.
 
 ### Phase 1 — Gather (parallel calls)
-1. `get_property_listings` — active listings in the target area
-2. `get_market_statistics` — zip-level market context
+1. `search_sale_listings` — active sale listings in target area
+2. `search_rental_listings` — active rental listings in target area
+3. `get_market_stats` — zip-level market context
 
 ### Phase 2 — Screen
 For each promising listing:
@@ -121,8 +129,8 @@ Filter to properties meeting minimum thresholds:
 
 ### Phase 3 — Quick Score
 For top 5 candidates:
-1. `get_property_data` — detailed property info
-2. `get_property_valuation` — market value estimate
+1. `search_property` — detailed property info
+2. `get_value_estimate` — market value estimate
 
 Apply Deal Score screening criteria. Present ranked results.
 
@@ -139,10 +147,10 @@ Apply Deal Score screening criteria. Present ranked results.
 Comprehensive investment analysis of a specific property.
 
 ### Phase 1 — Gather (parallel calls)
-1. `get_property_data` — property details
+1. `search_property` — property details
 2. `get_rent_estimate` — rental income estimate
-3. `get_property_valuation` — market value estimate
-4. `get_market_statistics` — area market context
+3. `get_value_estimate` — market value estimate
+4. `get_market_stats` — area market context
 5. `calculate_cocr` — cash-on-cash return
 6. `calculate_irr` — internal rate of return
 
@@ -174,9 +182,9 @@ Load `references/investment-metrics-benchmarks.md`. Calculate weighted Deal Scor
 Evaluate a property for house hacking.
 
 ### Phase 1 — Gather (parallel calls)
-1. `get_property_data` — property details and unit count
+1. `search_property` — property details and unit count
 2. `get_rent_estimate` — rental income for non-owner units
-3. `get_property_valuation` — market value
+3. `get_value_estimate` — market value
 4. `evaluate_house_hack` — house hack modeling
 
 ### Phase 2 — Financing options (parallel)
@@ -207,8 +215,8 @@ Load `references/house-hacking-strategies.md`.
 Buy, Rehab, Rent, Refinance, Repeat analysis.
 
 ### Phase 1 — Gather (parallel calls)
-1. `get_property_data` — current condition and details
-2. `get_property_valuation` — current value and ARV estimate
+1. `search_property` — current condition and details
+2. `get_value_estimate` — current value and ARV estimate
 3. `get_rent_estimate` — post-rehab rental income
 4. `analyze_brrrr_deal` — full BRRRR modeling
 
@@ -238,12 +246,12 @@ Load `references/investment-metrics-benchmarks.md` (BRRRR section).
 Evaluate flip profitability.
 
 ### Phase 1 — Gather (parallel calls)
-1. `get_property_data` — current condition
-2. `get_property_valuation` — current value and ARV
+1. `search_property` — current condition
+2. `get_value_estimate` — current value and ARV
 3. `analyze_fix_flip` — flip profitability model
 
 ### Phase 2 — Market validation
-1. `get_market_statistics` — DOM, price trends for exit timing
+1. `get_market_stats` — DOM, price trends for exit timing
 
 ### Phase 3 — Compute
 Load `references/investment-metrics-benchmarks.md` (flip section).
@@ -269,8 +277,8 @@ Detailed rental income analysis.
 
 ### Phase 1 — Gather (parallel calls)
 1. `get_rent_estimate` — algorithmic rent estimate
-2. `get_property_data` — property details
-3. `get_market_statistics` — area rental market
+2. `search_property` — property details
+3. `get_market_stats` — area rental market
 4. `calculate_dscr` — debt service coverage
 5. `calculate_cocr` — cash-on-cash return
 
@@ -298,9 +306,10 @@ Load `references/investment-metrics-benchmarks.md`.
 Area market analysis and scoring.
 
 ### Phase 1 — Gather (parallel calls)
-1. `get_market_statistics` — zip-level stats
+1. `get_market_stats` — zip-level stats
 2. `analyze_market_comps` — comparable analysis
-3. `get_property_listings` — active inventory sample
+3. `search_sale_listings` — active sale inventory sample
+4. `search_rental_listings` — active rental inventory sample
 
 ### Phase 2 — Compute
 Load `references/market-analysis-frameworks.md`.
@@ -329,9 +338,9 @@ Ask user for 2-5 property addresses to compare.
 
 ### Phase 2 — Gather (parallel per property)
 For each property:
-1. `get_property_data`
+1. `search_property`
 2. `get_rent_estimate`
-3. `get_property_valuation`
+3. `get_value_estimate`
 
 ### Phase 3 — Compare
 1. `compare_properties` — side-by-side analysis
@@ -384,9 +393,9 @@ Load `references/lending-guidelines.md`.
 Probabilistic risk assessment and sensitivity testing.
 
 ### Phase 1 — Gather (parallel calls)
-1. `get_property_data` — property details
+1. `search_property` — property details
 2. `get_rent_estimate` — base case rent
-3. `get_market_statistics` — market context
+3. `get_market_stats` — market context
 4. `run_monte_carlo` — 1,000 scenario simulation
 5. `analyze_sensitivity` — variable sensitivity (rent, vacancy, rate, appreciation)
 
@@ -412,7 +421,7 @@ Probabilistic risk assessment and sensitivity testing.
 Tax benefits, depreciation, and 1031 exchange analysis.
 
 ### Phase 1 — Gather (parallel calls)
-1. `get_property_data` — property details for depreciation basis
+1. `search_property` — property details for depreciation basis
 2. `calculate_tax_benefits` — annual tax savings from depreciation
 3. `analyze_1031_exchange` — exchange timeline and rules
 4. `calculate_capital_gains_tax` — estimated tax on sale

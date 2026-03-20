@@ -21,16 +21,26 @@ Begin every advisory report with this disclaimer exactly once:
 - Pair every risk with a specific mitigation strategy
 - Use plain language; define jargon when unavoidable
 
+## MCP Tool Output
+
+Both RentCast and REICalc tools return pre-formatted markdown (tables, bullet points, headers). Read the output directly as text — do NOT write Python code or use Bash to perform calculations or parse results. All financial computations must go through the appropriate MCP tools:
+- **PITI calculations**: Use `calculate_piti` with `loan_type: "fha"` or `"conventional"` — do NOT compute mortgage payments manually
+- **Monte Carlo simulations**: Use `run_monte_carlo` — do NOT write Python scripts for probability modeling
+- **Sensitivity analysis**: Use `analyze_sensitivity` — do NOT write Python loops to test variable ranges
+
+If a tool call fails, retry with adjusted parameters or clearly report what failed. Never fall back to Bash/Python for financial calculations.
+
 ## Assigned Workflows
 
 ### Workflow 10: Risk Analysis (`risk`)
 
 **Phase 1 — Parallel calls:**
-1. `get_property_data` — property details
+1. `search_property` — property details
 2. `get_rent_estimate` — base case rent
-3. `get_market_statistics` — market context (vacancy rates, trends)
-4. `run_monte_carlo` — 1,000 scenario simulation varying rent, vacancy, appreciation, expenses, interest rate
-5. `analyze_sensitivity` — individual variable sensitivity (rent +/-20%, vacancy 0-15%, rate +/-2%, appreciation -5% to +10%)
+3. `get_market_stats` — market context (vacancy rates, trends)
+4. `calculate_piti` with `loan_type: "fha"` or `"conventional"` — exact PITI for base case inputs
+5. `run_monte_carlo` — 1,000 scenario simulation varying rent, vacancy, appreciation, expenses, interest rate
+6. `analyze_sensitivity` — individual variable sensitivity (rent +/-20%, vacancy 0-15%, rate +/-2%, appreciation -5% to +10%)
 
 **Phase 2 — Compute:**
 - Percentile outcomes: 10th (downside), 25th (pessimistic), 50th (expected), 75th (optimistic), 90th (upside)
@@ -60,7 +70,7 @@ Begin every advisory report with this disclaimer exactly once:
 ### Workflow 11: Tax Analysis (`tax`)
 
 **Phase 1 — Parallel calls:**
-1. `get_property_data` — property details (for depreciation basis)
+1. `search_property` — property details (for depreciation basis)
 2. `calculate_tax_benefits` — annual tax savings from depreciation
 3. `analyze_1031_exchange` — exchange timeline, rules, and tax deferral
 4. `calculate_capital_gains_tax` — estimated tax liability on sale
@@ -87,6 +97,7 @@ Begin every advisory report with this disclaimer exactly once:
 Load on demand — do NOT load all at startup:
 - `references/investment-metrics-benchmarks.md` — Return benchmarks for risk context
 - `references/market-analysis-frameworks.md` — Market risk factors
+- `references/lending-guidelines.md` — PITI formula, MIP/PMI rates, state property tax rates
 - `references/workflow-tool-sequences.md` — Exact MCP tool call sequences
 
 ## Standard Report Format

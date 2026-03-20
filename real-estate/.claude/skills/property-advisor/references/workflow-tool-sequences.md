@@ -9,8 +9,9 @@ Exact MCP tool call sequences for each property advisor workflow. Tool names use
 ### Phase 1 — Parallel Scan
 ```
 PARALLEL:
-  rentcast: get_property_listings { zipCode: "<zip>", status: "active", limit: 20 }
-  rentcast: get_market_statistics { zipCode: "<zip>" }
+  rentcast: search_sale_listings { city: "<city>", state: "<state>", limit: 20 }
+  rentcast: search_rental_listings { city: "<city>", state: "<state>", limit: 20 }
+  rentcast: get_market_stats { zip: "<zip>" }
 ```
 
 ### Phase 2 — Filter and Screen
@@ -24,8 +25,8 @@ Calculate rent-to-price ratio. Filter to properties meeting minimum thresholds.
 For top 5 candidates:
 ```
 PARALLEL:
-  rentcast: get_property_data { address: "<address>" }
-  rentcast: get_property_valuation { address: "<address>" }
+  rentcast: search_property { address: "<address>" }
+  rentcast: get_value_estimate { address: "<address>" }
 ```
 Apply Deal Score screening criteria (cash flow estimate, market strength, rent-to-price).
 
@@ -36,10 +37,10 @@ Apply Deal Score screening criteria (cash flow estimate, market strength, rent-t
 ### Phase 1 — Parallel Data Gathering
 ```
 PARALLEL:
-  rentcast: get_property_data { address: "<address>" }
+  rentcast: search_property { address: "<address>" }
   rentcast: get_rent_estimate { address: "<address>" }
-  rentcast: get_property_valuation { address: "<address>" }
-  rentcast: get_market_statistics { zipCode: "<zip>" }
+  rentcast: get_value_estimate { address: "<address>" }
+  rentcast: get_market_stats { zip: "<zip>" }
   reicalc: calculate_cocr { purchasePrice, downPayment, monthlyRent, monthlyExpenses }
   reicalc: calculate_irr { purchasePrice, cashFlows, holdingPeriod }
 ```
@@ -73,10 +74,11 @@ Load `references/investment-metrics-benchmarks.md`. Calculate weighted Deal Scor
 ### Phase 1 — Parallel
 ```
 PARALLEL:
-  rentcast: get_property_data { address: "<address>" }
+  rentcast: search_property { address: "<address>" }
   rentcast: get_rent_estimate { address: "<address>" }
-  rentcast: get_property_valuation { address: "<address>" }
-  reicalc: evaluate_house_hack { purchasePrice, unitCount, ownerUnit, rentalIncome, expenses }
+  rentcast: get_value_estimate { address: "<address>" }
+  reicalc: evaluate_house_hack { purchasePrice, unitCount, ownerUnit, rentalIncome, expenses, loan_type: "fha" }
+  reicalc: calculate_piti { purchase_price, down_payment_pct, interest_rate, loan_type: "fha", property_tax_rate, annual_insurance }
 ```
 
 ### Phase 2 — Financing Options
@@ -98,8 +100,8 @@ Calculate mortgage offset %, evaluate FHA self-sufficiency (if 3-4 units), model
 ### Phase 1 — Parallel
 ```
 PARALLEL:
-  rentcast: get_property_data { address: "<address>" }
-  rentcast: get_property_valuation { address: "<address>" }
+  rentcast: search_property { address: "<address>" }
+  rentcast: get_value_estimate { address: "<address>" }
   rentcast: get_rent_estimate { address: "<address>" }
   reicalc: analyze_brrrr_deal { purchasePrice, rehabCost, arv, rentalIncome, expenses }
 ```
@@ -120,14 +122,14 @@ Calculate cash left in deal, post-refi CoC, infinite return check.
 ### Phase 1 — Parallel
 ```
 PARALLEL:
-  rentcast: get_property_data { address: "<address>" }
-  rentcast: get_property_valuation { address: "<address>" }
+  rentcast: search_property { address: "<address>" }
+  rentcast: get_value_estimate { address: "<address>" }
   reicalc: analyze_fix_flip { purchasePrice, rehabCost, arv, holdingMonths, financingCosts }
 ```
 
 ### Phase 2 — Comp Validation
 ```
-rentcast: get_market_statistics { zipCode: "<zip>" }
+rentcast: get_market_stats { zip: "<zip>" }
 ```
 Validate ARV against market comps and price/sqft.
 
@@ -143,8 +145,8 @@ Calculate MAO (70% rule), profit margin, ROI, holding costs.
 ```
 PARALLEL:
   rentcast: get_rent_estimate { address: "<address>" }
-  rentcast: get_property_data { address: "<address>" }
-  rentcast: get_market_statistics { zipCode: "<zip>" }
+  rentcast: search_property { address: "<address>" }
+  rentcast: get_market_stats { zip: "<zip>" }
   reicalc: calculate_dscr { noi, annualDebtService }
   reicalc: calculate_cocr { purchasePrice, downPayment, monthlyRent, monthlyExpenses }
 ```
@@ -165,9 +167,10 @@ Calculate cap rate, GRM, expense ratio, 50% rule validation, pro forma cash flow
 ### Phase 1 — Parallel
 ```
 PARALLEL:
-  rentcast: get_market_statistics { zipCode: "<zip>" }
+  rentcast: get_market_stats { zip: "<zip>" }
   reicalc: analyze_market_comps { zipCode: "<zip>" }
-  rentcast: get_property_listings { zipCode: "<zip>", status: "active", limit: 10 }
+  rentcast: search_sale_listings { city: "<city>", state: "<state>", limit: 10 }
+  rentcast: search_rental_listings { city: "<city>", state: "<state>", limit: 10 }
 ```
 
 ### Phase 2 — Compute
@@ -185,9 +188,9 @@ Collect up to 5 property addresses.
 ```
 FOR EACH property:
   PARALLEL:
-    rentcast: get_property_data { address }
+    rentcast: search_property { address }
     rentcast: get_rent_estimate { address }
-    rentcast: get_property_valuation { address }
+    rentcast: get_value_estimate { address }
 ```
 
 ### Phase 3 — Side-by-Side Analysis
@@ -208,7 +211,7 @@ Collect: gross monthly income, monthly debts, available down payment, target pro
 ### Phase 2 — Parallel Calculations
 ```
 PARALLEL:
-  reicalc: calculate_affordability { income, debts, downPayment, interestRate }
+  reicalc: calculate_affordability { income, debts, downPayment, interestRate, loan_type: "fha" }
   reicalc: calculate_mortgage_affordability { income, debts, downPayment }
   reicalc: analyze_debt_to_income { income, existingDebts, proposedPayment }
 ```
@@ -229,9 +232,10 @@ Calculate max purchase price by loan type, DTI impact, reserve requirements.
 ### Phase 1 — Parallel
 ```
 PARALLEL:
-  rentcast: get_property_data { address: "<address>" }
+  rentcast: search_property { address: "<address>" }
   rentcast: get_rent_estimate { address: "<address>" }
-  rentcast: get_market_statistics { zipCode: "<zip>" }
+  rentcast: get_market_stats { zip: "<zip>" }
+  reicalc: calculate_piti { purchase_price, down_payment_pct, interest_rate, loan_type: "fha", property_tax_rate, annual_insurance }
   reicalc: run_monte_carlo { baseCase, iterations: 1000, variables }
   reicalc: analyze_sensitivity { baseCase, variables: [rent, vacancy, rate, appreciation] }
 ```
@@ -246,7 +250,7 @@ Analyze downside scenarios: worst-case cash flow, break-even occupancy, rate sen
 ### Phase 1 — Parallel
 ```
 PARALLEL:
-  rentcast: get_property_data { address: "<address>" }
+  rentcast: search_property { address: "<address>" }
   reicalc: calculate_tax_benefits { purchasePrice, depreciableValue, taxBracket, holdingPeriod }
   reicalc: analyze_1031_exchange { relinquishedProperty, replacementProperty }
   reicalc: calculate_capital_gains_tax { purchasePrice, salePrice, holdingPeriod, taxBracket }
