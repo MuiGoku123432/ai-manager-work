@@ -31,6 +31,15 @@ Use without a subcommand for automatic routing based on your question.
 
 Low-level AppleScript automation skill. Used as a foundation by calendar-manager. Not typically invoked directly unless you need custom macOS automation.
 
+## Agent Team
+
+Specialized agents for parallel delegation from the root orchestrator:
+
+| Agent | Focus | Workflows |
+|-------|-------|-----------|
+| **schedule-manager** | Lead agent -- schedule visibility, event/reminder CRUD, free time finder | today, week, add event, add reminder, free, move, done |
+| **reminder-assistant** | Bulk reminder operations, list management, cross-domain task sync | bulk create, audit, list management, sync from Obsidian/trips/finances |
+
 ## Usage Guidance
 
 - **Quick check**: Run `/calendar-manager today` for a daily snapshot
