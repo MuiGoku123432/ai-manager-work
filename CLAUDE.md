@@ -33,7 +33,8 @@ This repo is organized into independent domains, each with scoped MCP servers, s
 ```
 finances/    -- Monarch Money MCP, financial advisor skill + agents
 real-estate/ -- RentCast + REICalc MCP, property advisor skill + agents
-brain/       -- Obsidian CLI, vault management
+brain/       -- Obsidian CLI, second-brain skill for vault management
+calendar/    -- Apple Calendar + Reminders via AppleScript automation
 ```
 
 **Cross-domain orchestration:** The root `.mcp.json` aggregates all domain MCP servers. Launching from the project root gives access to everything. Launching from a subdomain gives scoped access. Domain-level `CLAUDE.md` files take precedence within their directory.
@@ -56,14 +57,12 @@ brain/       -- Obsidian CLI, vault management
 
 Skills live in `.claude/skills/` (root level) and in each domain's `.claude/skills/`. Each skill gets a folder: `.claude/skills/skill-name/SKILL.md`. Skills are built organically as recurring workflows emerge.
 
-**Skills to build** (backlog from onboarding):
+**Skills to build** (backlog):
 - Sentinovo test run reports -- structured summary after each pipeline run
-- Trip planning template -- trail research, gear checklist, route notes, Obsidian note
 - ASU assignment template -- prompt in, structured academic response out
 - Weekly review digest -- Monarch Money snapshot + Sentinovo progress + priorities
 - The Narrow Road episode brief -- location + theme + gospel angle = full outline
 - Research synthesis -- deep research on a topic, structured deliverable out
-- Obsidian note structuring -- raw thoughts into proper vault location with formatting
 
 ## Decision Log
 
