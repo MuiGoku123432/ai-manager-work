@@ -16,6 +16,13 @@ tools: "*"                 # Always full tool access in this project
 ---
 ```
 
+**Important:** Agents do NOT support a `model` field in their frontmatter. Model selection happens at spawn time -- the orchestrator or skill that launches an agent should pass the recommended model via the Agent tool's `model` parameter. Document the recommended model in the agent's section of the domain `CLAUDE.md` so the orchestrator knows what to use.
+
+Model selection guidance:
+- **haiku** -- structured CRUD, arithmetic, benchmark lookups, batch processing, templated execution
+- **sonnet** -- conditional orchestration, multi-step analysis, probabilistic interpretation, delegation decisions
+- **opus** -- open-ended research synthesis, creative planning, deeply ambiguous trade-offs
+
 | Field | Required | Convention |
 |-------|----------|-----------|
 | `name` | Yes | Kebab-case. Must match the filename exactly (e.g., file `budget-analyst.md` → `name: budget-analyst`) |

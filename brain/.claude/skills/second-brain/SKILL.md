@@ -2,6 +2,7 @@
 name: second-brain
 description: Use when someone asks to capture a note, find something in Obsidian, organize the inbox, check project status, do a vault review, create a daily or weekly note, discover links, build a MOC, process inbox items, or audit tags. Also use when asked to search the vault, add a task to Obsidian, or pull info from notes.
 argument-hint: [command] [arguments]
+model: sonnet
 ---
 
 ## What This Skill Does

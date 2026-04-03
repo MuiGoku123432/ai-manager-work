@@ -2,6 +2,7 @@
 name: trip-planner
 description: Use when someone asks to plan a trip, research a trail, build an overlanding itinerary, create a gear checklist, plan a camping or wilderness trip, or prepare for an overland adventure. Also triggers on specific trip names like Flat Tops.
 argument-hint: [destination or trip name]
+model: opus
 ---
 
 ## What This Skill Does

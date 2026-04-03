@@ -86,14 +86,16 @@ Skills are the user-facing entry points. Root-level skills are always available.
 
 Each domain has a hub-and-spoke agent team. The lead agent is the entry point; specialists handle deep analysis. Spawn them directly for parallel work or delegate from the lead.
 
-| Domain | Lead Agent | Specialists |
-|--------|-----------|-------------|
-| finances | `financial-reviewer` | `budget-analyst`, `wealth-strategist`, `cashflow-manager`, `debt-tax-advisor` |
-| real-estate | `property-scout` | `market-analyst`, `investment-analyst`, `lending-advisor`, `risk-assessor` |
-| calendar | `schedule-manager` | `reminder-assistant` |
-| brain | *(no team yet -- use `/second-brain` skill directly)* | -- |
+| Domain | Lead Agent | Model | Specialists | Models |
+|--------|-----------|-------|-------------|--------|
+| finances | `financial-reviewer` | sonnet | `budget-analyst`, `cashflow-manager` | haiku |
+| finances | -- | -- | `wealth-strategist`, `debt-tax-advisor` | sonnet |
+| real-estate | `property-scout` | sonnet | `market-analyst`, `lending-advisor` | haiku |
+| real-estate | -- | -- | `investment-analyst`, `risk-assessor` | sonnet |
+| calendar | `schedule-manager` | haiku | `reminder-assistant` | haiku |
+| brain | *(no team -- use `/second-brain` skill)* | -- | -- | -- |
 
-**Orchestration pattern:** From the project root, spawn domain agents as subagents for parallel cross-domain work. Example: spawn `financial-reviewer` and `schedule-manager` simultaneously to cross-reference financial milestones with calendar availability.
+**Orchestration pattern:** From the project root, spawn domain agents as subagents for parallel cross-domain work. Always pass the recommended model when spawning -- it keeps token costs low without sacrificing quality. Example: spawn `financial-reviewer` (sonnet) and `schedule-manager` (haiku) simultaneously to cross-reference financial milestones with calendar availability.
 
 See each domain's `CLAUDE.md` for full agent workflow assignments and delegation triggers.
 

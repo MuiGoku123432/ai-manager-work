@@ -2,6 +2,7 @@
 name: calendar-manager
 description: Use when someone asks to check their calendar, see today's schedule, add an event, create a reminder, find free time, reschedule something, mark a reminder done, or manage their Apple Calendar or Apple Reminders.
 argument-hint: [command] [details]
+model: haiku
 ---
 
 ## What This Skill Does
