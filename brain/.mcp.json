@@ -1,11 +1,3 @@
 {
-  "mcpServers": {
-    "obsidian": {
-      "command": "/Users/cfanch06/Obsidian/The Mind/.obsidian/plugins/mcp-tools/bin/mcp-server",
-      "args": [],
-      "env": {
-        "OBSIDIAN_API_KEY": "${OBSIDIAN_API_KEY}"
-      }
-    }
-  }
+  "mcpServers": {}
 }

@@ -1,6 +1,6 @@
 # Workflow Tool Sequences
 
-Exact MCP tool call sequences for each second-brain workflow. Tool names use the MCP server prefix `mcp__obsidian__`. The prefix is added automatically when calling via MCP.
+Exact CLI command sequences for each second-brain workflow. All commands use the `obsidian` CLI (v1.12+) via Bash.
 
 ---
 
@@ -9,8 +9,8 @@ Exact MCP tool call sequences for each second-brain workflow. Tool names use the
 ### Phase 1 — Gather Context
 ```
 PARALLEL:
-  obsidian: search_vault_smart { query: "<title keywords>" }
-  obsidian: list_folder { path: "00-Inbox" }
+  obsidian search query="<title keywords>"
+  obsidian files folder="00-Inbox"
 ```
 
 ### Phase 2 — Check for Duplicates
@@ -21,10 +21,7 @@ Review search results. If a similar note exists, present it to the user with opt
 
 ### Phase 3 — Create (on confirmation)
 ```
-obsidian: create_note {
-  path: "00-Inbox/<title>.md",
-  content: "<frontmatter + body>"
-}
+obsidian create path="00-Inbox/<title>.md" content="<frontmatter + body>"
 ```
 
 Frontmatter for captures:
@@ -47,22 +44,22 @@ Confirm creation with link: `[[<title>]]`. Suggest related notes to link to.
 ### Phase 1 — Parallel Search
 ```
 PARALLEL:
-  obsidian: search_vault_smart { query: "<query>" }
-  obsidian: search_vault { query: "<query>" }
-  obsidian: get_tags {}
+  obsidian search query="<query>"
+  obsidian search:context query="<query>"
+  obsidian tags counts sort=count
 ```
 
 ### Phase 2 — Enrich Results
 For top 5 results:
 ```
 FOR EACH result:
-  obsidian: get_note { path: "<note-path>" }
+  obsidian read path="<note-path>"
 ```
 
 ### Phase 3 — Report
 Present results grouped by:
-1. Best semantic matches (from smart search)
-2. Exact text matches (from vault search)
+1. Best matches (from search)
+2. Contextual matches (from search:context)
 3. Related tags
 4. Suggested follow-up searches
 
@@ -73,15 +70,15 @@ Present results grouped by:
 ### Phase 1 — Audit
 ```
 PARALLEL:
-  obsidian: list_folder { path: "00-Inbox" }
-  obsidian: get_tags {}
-  obsidian: search_vault { query: "tags: []" }
+  obsidian files folder="00-Inbox"
+  obsidian tags counts sort=count
+  obsidian search query="tags: []"
 ```
 
 ### Phase 2 — Analyze
 For each inbox item:
 ```
-obsidian: get_note { path: "<inbox-note-path>" }
+obsidian read path="<inbox-note-path>"
 ```
 
 Classify each note:
@@ -98,8 +95,9 @@ Present reorganization plan as a table:
 ### Phase 4 — Execute (on confirmation, one at a time)
 ```
 FOR EACH approved move:
-  obsidian: edit_note { path: "<path>", content: "<updated frontmatter + content>" }
-  obsidian: move_note { path: "<old-path>", newPath: "<new-path>" }
+  obsidian read path="<path>"
+  obsidian create path="<path>" content="<updated frontmatter + content>"
+  obsidian move path="<old-path>" to="<new-path>"
 ```
 
 ---
@@ -110,16 +108,16 @@ FOR EACH approved move:
 ```
 IF name provided:
   PARALLEL:
-    obsidian: search_vault { query: "<name>" }
-    obsidian: search_vault_smart { query: "project <name>" }
+    obsidian search query="<name>"
+    obsidian search:context query="project <name>"
 ELSE:
-  obsidian: list_folder { path: "30-Projects" }
+  obsidian files folder="30-Projects"
 ```
 
 ### Phase 2 — Load Project Data
 ```
 FOR EACH project note:
-  obsidian: get_note { path: "<project-path>" }
+  obsidian read path="<project-path>"
 ```
 
 Extract from each: status, area, phases, target-date, updated date, tasks, relationships.
@@ -144,13 +142,13 @@ If single project: show full detail with phases, tasks, decisions log, connected
 
 ### Phase 1 — Gather All Projects
 ```
-obsidian: list_folder { path: "30-Projects" }
+obsidian files folder="30-Projects"
 ```
 
 ### Phase 2 — Load Relationships
 ```
 FOR EACH project:
-  obsidian: get_note { path: "<project-path>" }
+  obsidian read path="<project-path>"
 ```
 
 Extract: depends-on, feeds-into, shares-resource, supports, area.
@@ -179,20 +177,20 @@ Present:
 ### Phase 1 — Vault Health Scan
 ```
 PARALLEL:
-  obsidian: list_folder { path: "00-Inbox" }
-  obsidian: list_folder { path: "30-Projects" }
-  obsidian: list_folder { path: "70-Atlas" }
-  obsidian: get_tags {}
-  obsidian: search_vault { query: "status: active" }
+  obsidian files folder="00-Inbox"
+  obsidian files folder="30-Projects"
+  obsidian files folder="70-Atlas"
+  obsidian tags counts sort=count
+  obsidian search query="status: active"
 ```
 
 ### Phase 2 — Deep Audit
 ```
 FOR EACH active project:
-  obsidian: get_note { path: "<project-path>" }
+  obsidian read path="<project-path>"
 
 FOR EACH MOC:
-  obsidian: get_note { path: "<moc-path>" }
+  obsidian read path="<moc-path>"
 ```
 
 ### Phase 3 — Calculate Health Score
@@ -233,31 +231,28 @@ Recommendations:
 ### Phase 1 — Check Existing
 ```
 PARALLEL:
-  obsidian: search_vault { query: "YYYY-MM-DD" }
-  obsidian: list_folder { path: "50-Daily" }
+  obsidian search query="YYYY-MM-DD"
+  obsidian files folder="50-Daily"
 ```
 
 ### Phase 2 — Create or Load
 ```
 IF daily note exists:
-  obsidian: get_note { path: "50-Daily/YYYY-MM-DD.md" }
+  obsidian read path="50-Daily/YYYY-MM-DD.md"
 ELSE:
-  obsidian: apply_template { templatePath: "60-Templates/Daily Note.md", targetPath: "50-Daily/YYYY-MM-DD.md" }
+  obsidian create path="50-Daily/YYYY-MM-DD.md" template="Daily Note"
 ```
 
 Note: If template application fails, create manually:
 ```
-obsidian: create_note {
-  path: "50-Daily/YYYY-MM-DD.md",
-  content: "<daily note frontmatter + sections>"
-}
+obsidian create path="50-Daily/YYYY-MM-DD.md" content="<daily note frontmatter + sections>"
 ```
 
 ### Phase 3 — Context Gathering
 ```
 PARALLEL:
-  obsidian: search_vault { query: "status: active" }
-  obsidian: list_folder { path: "00-Inbox" }
+  obsidian search query="status: active"
+  obsidian files folder="00-Inbox"
 ```
 
 ### Phase 4 — Report
@@ -274,24 +269,24 @@ Present:
 ### Phase 1 — Gather Week's Data
 ```
 PARALLEL:
-  obsidian: search_vault { query: "YYYY-W##" }
-  obsidian: list_folder { path: "50-Daily" }
-  obsidian: list_folder { path: "00-Inbox" }
-  obsidian: search_vault { query: "status: active" }
+  obsidian search query="YYYY-W##"
+  obsidian files folder="50-Daily"
+  obsidian files folder="00-Inbox"
+  obsidian search query="status: active"
 ```
 
 ### Phase 2 — Load Daily Notes
 ```
 FOR EACH daily note from this week:
-  obsidian: get_note { path: "50-Daily/YYYY-MM-DD.md" }
+  obsidian read path="50-Daily/YYYY-MM-DD.md"
 ```
 
 ### Phase 3 — Create or Update Weekly Note
 ```
 IF weekly note exists:
-  obsidian: get_note { path: "50-Daily/YYYY-W##.md" }
+  obsidian read path="50-Daily/YYYY-W##.md"
 ELSE:
-  obsidian: apply_template { templatePath: "60-Templates/Weekly Note.md", targetPath: "50-Daily/YYYY-W##.md" }
+  obsidian create path="50-Daily/YYYY-W##.md" template="Weekly Note"
 ```
 
 ### Phase 4 — Compile and Report
@@ -308,23 +303,23 @@ Synthesize the week:
 
 ### Phase 1 — Load Target Note
 ```
-obsidian: search_vault { query: "<note>" }
-obsidian: get_note { path: "<found-path>" }
+obsidian search query="<note>"
+obsidian read path="<found-path>"
 ```
 
 ### Phase 2 — Discover Connections
 ```
 PARALLEL:
-  obsidian: search_vault_smart { query: "<note content keywords>" }
-  obsidian: search_vault { query: "<key terms from note>" }
-  obsidian: get_tags {}
+  obsidian search:context query="<note content keywords>"
+  obsidian search query="<key terms from note>"
+  obsidian tags counts sort=count
 ```
 
 ### Phase 3 — Analyze and Suggest
 For top 10 candidates:
 ```
 FOR EACH candidate:
-  obsidian: get_note { path: "<candidate-path>" }
+  obsidian read path="<candidate-path>"
 ```
 
 Evaluate connection strength:
@@ -341,7 +336,8 @@ Present link suggestions:
 ### Phase 5 — Execute (on confirmation)
 ```
 FOR EACH approved link:
-  obsidian: edit_note { path: "<note-path>", content: "<add link to Related section>" }
+  obsidian read path="<note-path>"
+  obsidian create path="<note-path>" content="<updated content with link in Related section>"
 ```
 
 ---
@@ -352,17 +348,17 @@ FOR EACH approved link:
 ```
 IF topic provided:
   PARALLEL:
-    obsidian: search_vault { query: "MOC - <topic>" }
-    obsidian: search_vault_smart { query: "<topic>" }
-    obsidian: get_tags {}
+    obsidian search query="MOC - <topic>"
+    obsidian search:context query="<topic>"
+    obsidian tags counts sort=count
 ELSE:
-  obsidian: list_folder { path: "70-Atlas" }
+  obsidian files folder="70-Atlas"
 ```
 
 ### Phase 2 — Gather Related Notes
 ```
 FOR EACH relevant note:
-  obsidian: get_note { path: "<note-path>" }
+  obsidian read path="<note-path>"
 ```
 
 ### Phase 3 — Build or Update MOC
@@ -379,12 +375,10 @@ Present proposed MOC structure.
 ### Phase 5 — Execute (on confirmation)
 ```
 IF new MOC:
-  obsidian: create_note {
-    path: "70-Atlas/MOC - <Topic>.md",
-    content: "<MOC frontmatter + structured content>"
-  }
+  obsidian create path="70-Atlas/MOC - <Topic>.md" content="<MOC frontmatter + structured content>"
 ELSE:
-  obsidian: edit_note { path: "<moc-path>", content: "<updated content>" }
+  obsidian read path="<moc-path>"
+  obsidian create path="<moc-path>" content="<updated content>"
 ```
 
 ---
@@ -393,13 +387,13 @@ ELSE:
 
 ### Phase 1 — Load Inbox
 ```
-obsidian: list_folder { path: "00-Inbox" }
+obsidian files folder="00-Inbox"
 ```
 
 ### Phase 2 — Classify Each Item
 ```
 FOR EACH inbox note:
-  obsidian: get_note { path: "00-Inbox/<note>.md" }
+  obsidian read path="00-Inbox/<note>.md"
 ```
 
 For each note, determine:
@@ -417,8 +411,9 @@ Present processing plan:
 ### Phase 4 — Execute (on confirmation)
 ```
 FOR EACH approved action:
-  obsidian: edit_note { path: "<path>", content: "<updated content>" }
-  obsidian: move_note { path: "00-Inbox/<note>.md", newPath: "<target-folder>/<note>.md" }
+  obsidian read path="<path>"
+  obsidian create path="<path>" content="<updated content>"
+  obsidian move path="00-Inbox/<note>.md" to="<target-folder>/<note>.md"
 ```
 
 ---
@@ -428,9 +423,9 @@ FOR EACH approved action:
 ### Phase 1 — Gather Tag Data
 ```
 PARALLEL:
-  obsidian: get_tags {}
+  obsidian tags counts sort=count
   IF query:
-    obsidian: search_vault { query: "#<query>" }
+    obsidian search query="#<query>"
 ```
 
 ### Phase 2 — Analyze
@@ -460,6 +455,6 @@ Issues:
 ### Phase 4 — Execute (on confirmation)
 ```
 FOR EACH approved fix:
-  obsidian: get_note { path: "<note-path>" }
-  obsidian: edit_note { path: "<note-path>", content: "<fix tag in frontmatter>" }
+  obsidian read path="<note-path>"
+  obsidian create path="<note-path>" content="<fix tag in frontmatter>"
 ```
