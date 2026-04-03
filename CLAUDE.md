@@ -55,7 +55,25 @@ calendar/    -- Apple Calendar + Reminders via AppleScript automation
 
 ## Skills
 
-Skills live in `.claude/skills/` (root level) and in each domain's `.claude/skills/`. Each skill gets a folder: `.claude/skills/skill-name/SKILL.md`. Skills are built organically as recurring workflows emerge.
+Skills are the user-facing entry points. Root-level skills are always available. Domain skills activate when working inside that domain.
+
+**Root-level:**
+
+| Skill | Purpose |
+|-------|---------|
+| `/skill-builder` | Build or audit Claude Code skills |
+| `/agent-builder` | Build or audit a single agent definition |
+| `/team-builder` | Build or audit a full lead+specialist agent team |
+| `/trip-planner` | Plan overlanding trips end-to-end with Obsidian integration |
+
+**Domain skills:**
+
+| Skill | Domain | Purpose |
+|-------|--------|---------|
+| `/financial-advisor` | finances | 14-subcommand financial advisor via Monarch Money MCP |
+| `/property-advisor` | real-estate | 12-subcommand property advisor via RentCast + REICalc MCP |
+| `/second-brain` | brain | 12-workflow Obsidian vault manager |
+| `/calendar-manager` | calendar | Calendar events and reminders via AppleScript |
 
 **Skills to build** (backlog):
 - Sentinovo test run reports -- structured summary after each pipeline run
@@ -63,6 +81,21 @@ Skills live in `.claude/skills/` (root level) and in each domain's `.claude/skil
 - Weekly review digest -- Monarch Money snapshot + Sentinovo progress + priorities
 - The Narrow Road episode brief -- location + theme + gospel angle = full outline
 - Research synthesis -- deep research on a topic, structured deliverable out
+
+## Agent Teams
+
+Each domain has a hub-and-spoke agent team. The lead agent is the entry point; specialists handle deep analysis. Spawn them directly for parallel work or delegate from the lead.
+
+| Domain | Lead Agent | Specialists |
+|--------|-----------|-------------|
+| finances | `financial-reviewer` | `budget-analyst`, `wealth-strategist`, `cashflow-manager`, `debt-tax-advisor` |
+| real-estate | `property-scout` | `market-analyst`, `investment-analyst`, `lending-advisor`, `risk-assessor` |
+| calendar | `schedule-manager` | `reminder-assistant` |
+| brain | *(no team yet -- use `/second-brain` skill directly)* | -- |
+
+**Orchestration pattern:** From the project root, spawn domain agents as subagents for parallel cross-domain work. Example: spawn `financial-reviewer` and `schedule-manager` simultaneously to cross-reference financial milestones with calendar availability.
+
+See each domain's `CLAUDE.md` for full agent workflow assignments and delegation triggers.
 
 ## Decision Log
 
