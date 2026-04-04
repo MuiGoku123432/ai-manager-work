@@ -61,6 +61,8 @@ Skills are the user-facing entry points. Root-level skills are always available.
 
 | Skill | Purpose |
 |-------|---------|
+| `/briefing` | Daily morning briefing -- calendar, focus items, financial pulse, approaching deadlines |
+| `/review` | Cross-domain orchestrator -- weekly digest, monthly deep-dive, or quick status across all domains |
 | `/skill-builder` | Build or audit Claude Code skills |
 | `/agent-builder` | Build or audit a single agent definition |
 | `/team-builder` | Build or audit a full lead+specialist agent team |
@@ -78,7 +80,6 @@ Skills are the user-facing entry points. Root-level skills are always available.
 **Skills to build** (backlog):
 - Sentinovo test run reports -- structured summary after each pipeline run
 - ASU assignment template -- prompt in, structured academic response out
-- Weekly review digest -- Monarch Money snapshot + Sentinovo progress + priorities
 - The Narrow Road episode brief -- location + theme + gospel angle = full outline
 - Research synthesis -- deep research on a topic, structured deliverable out
 
