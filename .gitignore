@@ -2,6 +2,10 @@
 .tmp/
 credentials.json
 token.json
-CLAUDE.local.md
-.claude/settings.local.json
 node_modules/
+
+# Vault contents (compliance -- no company data in git)
+vault/**/*.md
+vault/.obsidian/
+# Keep folder scaffolding via .gitkeep
+!vault/**/.gitkeep

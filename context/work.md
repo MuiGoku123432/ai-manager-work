@@ -1,32 +1,30 @@
-# My Business / Work
+# W2 Engineering Work
 
-## Ventures
+## Employers
 
-| Venture | Description | Status |
-|---------|-------------|--------|
-| **Sentinovo** | Mainframe modernization startup. COBOL ingestion pipeline + graph analysis + migration planning platform. Pre-revenue SaaS targeting enterprise mainframe shops. | Active build -- top priority |
-| **The Narrow Road** (@narrowroadoverland) | YouTube/content platform. Overlanding + gospel mission. | Pre-monetization, brand phase |
-| **Lockheed Martin + Windstream** | W2 software engineering. | Primary income |
+| Employer | Role | Focus |
+|----------|------|-------|
+| **Lockheed Martin** | Software Engineer | <update with role details> |
+| **Windstream** | Software Engineer | <update with role details> |
 
-## Revenue Reality
+## Professional Development
 
-W2 jobs carry all the bills. Sentinovo and The Narrow Road are both pre-revenue. Sentinovo is the one being actively built toward a paying product.
+| Activity | Description | Status |
+|----------|-------------|--------|
+| **ASU AI Degree** | Graduate coursework in AI/ML, integrated into professional work where possible | Active |
 
 ## Tech Stack
 
-- **Sentinovo core:** Go, Neo4j, Docker
-- **GUI tooling:** Wails + React/TSX + Bun
+- **Languages:** <update: Go, Java, Python, etc.>
+- **Frameworks:** <update>
 - **Dev environment:** LazyVim, zsh, zellij, ghostty
-- **AI layer:** Claude + Claude Code
-- **Second brain:** Obsidian
-- **Finance tracking:** Monarch Money
-- **Content capture:** DJI Air 3S
+- **AI layer:** Claude + Crush CLI
+- **Second brain:** Obsidian (embedded vault at `vault/`)
 
-## Connected MCP Servers
+## Active Work Areas
 
-| Server | Domain | Purpose |
-|--------|--------|---------|
-| Monarch Money | finances | Personal finance data, budgets, accounts |
-| RentCast | real-estate | Property data, rental estimates, market stats |
-| REICalc | real-estate | Investment property calculations |
-| Obsidian CLI | brain | Vault management, note operations |
+Update this section as your W2 focus shifts. Be specific enough that an AI assistant can understand what you're building and why.
+
+| Area | Employer | Description | Priority |
+|------|----------|-------------|----------|
+| <project name> | Lockheed / Windstream | <description> | High / Medium / Low |

@@ -1,143 +1,134 @@
 #!/usr/bin/env bash
-# tools/research-loop.sh
-#
-# Outer loop for the recursive-research ratchet. Re-invokes Claude Code for
-# each iteration, checks termination criteria, and auto-synthesizes + exports
-# when done. Designed for unattended runs in tmux.
+# research-loop.sh -- Unattended recursive research loop for Crush CLI
 #
 # Usage:
 #   ./tools/research-loop.sh <topic-slug> [max-iterations] [interval-seconds]
 #
-# Examples:
-#   ./tools/research-loop.sh battery-chemistry
-#   ./tools/research-loop.sh mcp-server-patterns 15 60
-#   tmux new-session -d -s research './tools/research-loop.sh mcp-server-patterns 15'
+# Example:
+#   tmux new-session -d -s research './tools/research-loop.sh graphql-federation 15'
 #
-# Prerequisites:
-#   - Run from the ai-projects repo root
-#   - Claude Code CLI must be on PATH (command: claude)
-#   - projects/<slug>/program.md must exist (run /recursive-research start <topic> first)
+# Requirements:
+#   - crush CLI installed and on PATH
+#   - Git repo initialized
+#   - projects/<topic-slug>/program.md must exist (run /recursive-research start first)
 
 set -euo pipefail
 
-# ---- Args ----
-SLUG="${1:-}"
-MAX_ITERATIONS="${2:-10}"
-INTERVAL_SECONDS="${3:-30}"
+SLUG="${1:?Usage: $0 <topic-slug> [max-iterations] [interval-seconds]}"
+MAX_ITER="${2:-10}"
+INTERVAL="${3:-30}"
 
-if [[ -z "$SLUG" ]]; then
-  echo "Usage: $0 <topic-slug> [max-iterations] [interval-seconds]"
-  echo "Example: $0 battery-chemistry 10 30"
-  exit 1
-fi
+STALL_LIMIT=3
+stall_count=0
+iteration=0
 
-PROJECT_DIR="projects/$SLUG"
-PROGRAM_FILE="$PROJECT_DIR/program.md"
-RESULTS_FILE="$PROJECT_DIR/results.md"
+log() {
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+}
 
-# ---- Validate ----
-if [[ ! -f "$PROGRAM_FILE" ]]; then
-  echo "ERROR: $PROGRAM_FILE not found."
-  echo "Run '/recursive-research start $SLUG' in a Claude Code session first."
-  exit 1
-fi
-
-echo "========================================"
-echo "Recursive Research Loop"
-echo "Topic slug: $SLUG"
-echo "Max iterations: $MAX_ITERATIONS"
-echo "Interval: ${INTERVAL_SECONDS}s between iterations"
-echo "Started: $(date)"
-echo "========================================"
-
-# ---- Extract termination criteria from program.md ----
-MAX_FROM_PROGRAM=$(grep -oP 'Max iterations:\s*\K[0-9]+' "$PROGRAM_FILE" 2>/dev/null || echo "")
-COMPLETENESS_THRESHOLD=$(grep -oP 'Completeness threshold:\s*\K[0-9]+' "$PROGRAM_FILE" 2>/dev/null || echo "85")
-
-if [[ -n "$MAX_FROM_PROGRAM" && "$MAX_FROM_PROGRAM" -lt "$MAX_ITERATIONS" ]]; then
-  MAX_ITERATIONS="$MAX_FROM_PROGRAM"
-  echo "Using max iterations from program.md: $MAX_ITERATIONS"
-fi
-
-echo "Completeness target: ${COMPLETENESS_THRESHOLD}%"
-echo ""
-
-# ---- Loop ----
-ITERATION=0
-CONSECUTIVE_NO_COMMITS=0
-
-for ((i=1; i<=MAX_ITERATIONS; i++)); do
-  ITERATION=$i
-  echo "----------------------------------------"
-  echo "Iteration $i / $MAX_ITERATIONS -- $(date)"
-  echo "----------------------------------------"
-
-  # Invoke Claude Code for one research iteration
-  if claude --print --dangerously-skip-permissions \
-    -p "Run /recursive-research iterate $SLUG. Output the iteration summary table and commit decision." \
-    2>&1; then
-    echo "Iteration $i complete."
-  else
-    echo "WARNING: Claude Code exited non-zero on iteration $i. Retrying after pause..."
-    sleep "$INTERVAL_SECONDS"
-    continue
+check_prerequisites() {
+  if ! command -v crush &>/dev/null; then
+    echo "Error: crush CLI not found on PATH. Install from https://github.com/charmbracelet/crush"
+    exit 1
   fi
+  if [ ! -f "projects/${SLUG}/program.md" ]; then
+    echo "Error: projects/${SLUG}/program.md not found."
+    echo "Run '/recursive-research start ${SLUG}' first to initialize the research project."
+    exit 1
+  fi
+  if [ ! -d ".git" ]; then
+    echo "Error: not a git repository. The ratchet pattern requires git."
+    exit 1
+  fi
+}
 
-  # Check if this iteration committed (look for a new commit with the slug)
-  LAST_COMMIT_MSG=$(git log --oneline -1 2>/dev/null | grep "research($SLUG)" || echo "")
-  if [[ -z "$LAST_COMMIT_MSG" ]]; then
-    CONSECUTIVE_NO_COMMITS=$((CONSECUTIVE_NO_COMMITS + 1))
-    echo "No commit this iteration ($CONSECUTIVE_NO_COMMITS consecutive)."
-    if [[ "$CONSECUTIVE_NO_COMMITS" -ge 3 ]]; then
-      echo ""
-      echo "STALLED: 3 consecutive iterations without improvement."
-      echo "Recommend: Edit $PROGRAM_FILE to adjust search strategy, then restart."
+get_git_commit_count() {
+  git log --oneline --grep="research(${SLUG}):" 2>/dev/null | wc -l | tr -d ' '
+}
+
+run_iteration() {
+  local before
+  before=$(get_git_commit_count)
+
+  log "Starting iteration $((iteration + 1)) of ${MAX_ITER} for '${SLUG}'"
+
+  # Run one research iteration via Crush headless mode
+  # NOTE: Crush headless invocation -- update this command if Crush CLI flags change
+  crush --no-interactive --prompt "Run /recursive-research iterate ${SLUG}" \
+    2>&1 | tee -a "projects/${SLUG}/loop.log"
+
+  local after
+  after=$(get_git_commit_count)
+
+  if [ "$after" -gt "$before" ]; then
+    log "Iteration committed (total commits: ${after})"
+    stall_count=0
+    return 0
+  else
+    log "No commit this iteration (stall count: $((stall_count + 1))/${STALL_LIMIT})"
+    stall_count=$((stall_count + 1))
+    return 1
+  fi
+}
+
+check_completeness() {
+  # Read the last completeness percentage from results.md
+  # Looks for the most recent row in the Scores table
+  if [ -f "projects/${SLUG}/results.md" ]; then
+    grep -oP '\d+(?=%)' "projects/${SLUG}/results.md" | tail -1
+  else
+    echo "0"
+  fi
+}
+
+synthesize_and_export() {
+  log "Running synthesis and export for '${SLUG}'"
+  crush --no-interactive --prompt "Run /recursive-research synthesize ${SLUG}" \
+    2>&1 | tee -a "projects/${SLUG}/loop.log"
+  sleep "${INTERVAL}"
+  crush --no-interactive --prompt "Run /recursive-research export ${SLUG}" \
+    2>&1 | tee -a "projects/${SLUG}/loop.log"
+}
+
+main() {
+  check_prerequisites
+
+  log "=== Research Loop Starting ==="
+  log "Topic: ${SLUG}"
+  log "Max iterations: ${MAX_ITER}"
+  log "Interval: ${INTERVAL}s"
+
+  while [ "${iteration}" -lt "${MAX_ITER}" ]; do
+    iteration=$((iteration + 1))
+
+    run_iteration || true
+
+    # Check stall limit
+    if [ "${stall_count}" -ge "${STALL_LIMIT}" ]; then
+      log "Stall limit reached (${STALL_LIMIT} consecutive no-commits)."
+      log "Recommendation: revise projects/${SLUG}/program.md search strategy."
+      log "Stopping loop."
       break
     fi
-  else
-    CONSECUTIVE_NO_COMMITS=0
-    echo "Committed: $LAST_COMMIT_MSG"
-  fi
 
-  # Check completeness from results.md
-  if [[ -f "$RESULTS_FILE" ]]; then
-    LATEST_COMPLETENESS=$(grep -oP '\d+(?=%)' "$RESULTS_FILE" | tail -1 || echo "0")
-    echo "Current completeness: ${LATEST_COMPLETENESS}%"
-
-    if [[ "$LATEST_COMPLETENESS" -ge "$COMPLETENESS_THRESHOLD" ]]; then
-      echo ""
-      echo "TERMINATION: Completeness threshold reached (${LATEST_COMPLETENESS}% >= ${COMPLETENESS_THRESHOLD}%)."
-      break
+    # Check completeness threshold (85% by default)
+    completeness=$(check_completeness)
+    if [ "${completeness}" -ge 85 ]; then
+      log "Completeness threshold reached: ${completeness}%"
+      synthesize_and_export
+      log "=== Research Loop Complete ==="
+      exit 0
     fi
-  fi
 
-  # Pause between iterations (skip on last iteration)
-  if [[ "$i" -lt "$MAX_ITERATIONS" ]]; then
-    echo "Pausing ${INTERVAL_SECONDS}s..."
-    sleep "$INTERVAL_SECONDS"
-  fi
-done
+    if [ "${iteration}" -lt "${MAX_ITER}" ]; then
+      log "Waiting ${INTERVAL}s before next iteration..."
+      sleep "${INTERVAL}"
+    fi
+  done
 
-# ---- Auto-synthesize and export ----
-echo ""
-echo "========================================"
-echo "Loop complete after $ITERATION iterations."
-echo "Running synthesis and export..."
-echo "========================================"
+  log "Max iterations (${MAX_ITER}) reached."
+  synthesize_and_export
+  log "=== Research Loop Complete ==="
+}
 
-claude --print --dangerously-skip-permissions \
-  -p "Run /recursive-research synthesize $SLUG. Then run /recursive-research export $SLUG." \
-  2>&1 || echo "WARNING: Auto-synthesis/export failed. Run manually."
-
-echo ""
-echo "========================================"
-echo "Research loop finished."
-echo "Topic: $SLUG"
-echo "Iterations run: $ITERATION"
-echo "Ended: $(date)"
-echo ""
-echo "Review:"
-echo "  git log --oneline --grep=\"research($SLUG)\""
-echo "  cat $RESULTS_FILE"
-echo "  cat projects/$SLUG/reports/*.md | head -50"
-echo "========================================"
+main

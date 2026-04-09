@@ -8,8 +8,6 @@ Priority-based execution. No formal OKR system -- ranked by importance and momen
 
 | Goal | Key Milestone | Status |
 |------|--------------|--------|
-| Sentinovo | Ship migration planning frontend MVP | In progress |
-| Ram 2500 | Finalize spec, book THOR Off-Road | In progress |
-| The Narrow Road | Brand finalized, first trip filmed (Flat Tops) | Planning |
+| <W2 goal 1> | <milestone> | In progress |
+| <W2 goal 2> | <milestone> | Planning |
 | ASU | Maintain coursework pace | Ongoing |
-| Financial | Truck build feasibility confirmed within wedding savings timeline | Planning |

@@ -1,155 +1,177 @@
 # New Machine Setup
 
-Steps to get the ai-projects assistant system fully operational on a new machine.
+SOP for setting up the W2 engineering assistant on a new machine.
 
 ---
 
-## 1. Prerequisites
+## Prerequisites
 
-Install these before anything else:
+- macOS (Darwin)
+- Homebrew installed
+- Git configured with your identity
 
-| Tool | Install | Verify |
-|------|---------|--------|
-| Claude Code | `npm install -g @anthropic/claude-code` | `claude --version` |
-| obsidian-cli | `brew install obsidian-cli` or follow repo instructions | `which obsidian` |
-| git | Included on macOS via Xcode CLT | `git --version` |
-| Node / npm | `brew install node` | `node --version` |
+---
+
+## 1. Install Crush CLI
+
+```bash
+# Option A: Homebrew (recommended)
+brew install charmbracelet/tap/crush
+
+# Option B: Go install
+go install github.com/charmbracelet/crush@latest
+
+# Verify
+crush --version
+```
 
 ---
 
 ## 2. Clone the Repo
 
 ```bash
-git clone <repo-url> ~/repos/mine/ai-projects
-cd ~/repos/mine/ai-projects
+git clone <repo-url> ~/repos/work-assistant
+cd ~/repos/work-assistant
 ```
 
 ---
 
-## 3. Git Configuration
+## 3. Configure AI Provider
 
-The repo enforces conventional commits and git worktrees via `.claude/rules/git-conventions.md` -- Claude Code loads this automatically. No manual setup needed for Claude to follow these rules, but understand the workflow:
+Crush needs an AI provider configured. For Claude (Anthropic):
 
-**Conventional commit format:**
-```
-<type>(<scope>): <description>
-
-feat(brain): add 80-lab folder support
-fix(project-init): correct obsidian create flag
-docs: update new-machine-setup SOP
-chore: bump context files for Q2
-```
-
-Types: `feat`, `fix`, `docs`, `refactor`, `chore`, `style`, `test`, `build`, `ci`, `perf`
-
-**Git worktrees** -- for parallel branches without stashing:
 ```bash
-# Create a worktree for a feature branch
-git worktree add ../ai-projects-<feature> -b <branch-name>
+# Add to your shell profile (~/.zshrc or ~/.zprofile):
+echo 'export ANTHROPIC_API_KEY=<your-key>' >> ~/.zshrc
+source ~/.zshrc
+```
 
-# List worktrees
-git worktree list
+No additional config changes needed. Model selection is handled via Crush's built-in settings or `ANTHROPIC_MODEL` env var if you want to override defaults.
 
-# Remove when done
-git worktree remove ../ai-projects-<feature>
-git branch -d <branch-name>
+---
+
+## 4. Install Global Skills and Config
+
+This repo ships a `global/` directory with skills, resources, and agent templates that get symlinked into `~/.config/crush/` for availability in every Crush session.
+
+```bash
+# From the repo root
+chmod +x global/setup.sh
+./global/setup.sh
+```
+
+Verify the output shows symlinks created for skills, agents, resources, and config. Verify:
+
+```bash
+ls -la ~/.config/crush/skills/   # should show symlinks to global/skills/*
+cat ~/.config/crush/crush.json   # should show global config
 ```
 
 ---
 
-## 4. Symlink Global Skills
-
-Makes all root-level skills available from any project on the device -- not just when launched from this repo.
+## 5. Install Obsidian CLI
 
 ```bash
-SKILLS_SRC="$HOME/repos/mine/ai-projects/.claude/skills"
-SKILLS_GLOBAL="$HOME/.claude/skills"
+# Option A: Homebrew
+brew install obsidian-cli
 
-mkdir -p "$SKILLS_GLOBAL"
-
-for skill_dir in "$SKILLS_SRC"/*/; do
-  skill_name=$(basename "$skill_dir")
-  ln -sf "$skill_dir" "$SKILLS_GLOBAL/$skill_name"
-  echo "Linked: $skill_name"
-done
+# Verify
+which obsidian
+obsidian --version
 ```
 
-Verify:
-```bash
-ls -la ~/.claude/skills/
-```
-
-Each entry should be a symlink pointing into `~/repos/mine/ai-projects/.claude/skills/`.
-
-**When you add a new root-level skill later**, register it with:
-```bash
-ln -sf ~/repos/mine/ai-projects/.claude/skills/<skill-name>/ ~/.claude/skills/<skill-name>
-```
+**Requirements:** Obsidian Desktop v1.12.0+ must be installed and running with the CLI toggle enabled in Settings > General > CLI.
 
 ---
 
-## 5. Configure MCP Servers
+## 6. Open the Vault in Obsidian Desktop
 
-Each domain that uses an MCP server needs credentials or environment variables. Set these up before using that domain.
+The vault is embedded at `vault/` in the repo.
 
-| Domain | Server | What's Needed |
-|--------|--------|---------------|
-| finances | Monarch Money | API token in env or MCP config |
-| real-estate | RentCast | API key |
-| real-estate | REICalc | (check domain `.mcp.json`) |
-| brain | obsidian-cli | obsidian-cli binary on PATH, vault at `/Users/<you>/Obsidian/The Mind/` |
+1. Open Obsidian Desktop
+2. Click "Open folder as vault"
+3. Select `<repo-root>/vault/`
+4. Name it "The Forge" when prompted
 
-Update the vault path in `brain/CLAUDE.md` and `brain/.claude/skills/second-brain/SKILL.md` if your vault lives elsewhere.
-
----
-
-## 6. Configure obsidian-cli Plugin
-
-The `brain/` and `project-initializer/` domains require the obsidian-cli Claude Code plugin. Verify it's enabled:
-
+Verify CLI connectivity:
 ```bash
-cat brain/.claude/settings.json
-# Should show: {"enabledPlugins": {"obsidian-cli@obsidian-cli-skill": true}}
+obsidian "The Forge" version
 ```
-
-If the plugin isn't installed, follow the obsidian-cli repo setup instructions to install it as a Claude Code plugin.
 
 ---
 
 ## 7. Update Context Files
 
-These files drive prioritization and goal-setting across all domains. Update them to reflect your current situation:
+Fill in your W2-specific details:
 
-- `context/me.md` -- identity, role, #1 priority
-- `context/work.md` -- ventures, tech stack, connected MCP servers
-- `context/current-priorities.md` -- ranked focus areas (re-rank at the start of each week)
-- `context/goals.md` -- quarterly goals (re-write at the start of each quarter)
+```bash
+# Open each file and replace placeholder content with your actual info
+open context/work.md             # W2 roles, tech stacks, active work areas
+open context/current-priorities.md  # Ranked W2 priorities
+open context/goals.md            # Q2 engineering goals
+```
 
 ---
 
 ## 8. Verify the Setup
 
-From the repo root, start a Claude Code session and run:
+```bash
+# Crush reads AGENTS.md correctly
+crush
 
+# In Crush, verify skills are available
+# Press Ctrl+K and look for /second-brain, /project-init, etc.
+
+# Vault is accessible (Obsidian Desktop must be running)
+obsidian "The Forge" search query="test"
+
+# Global skills are discoverable
+ls ~/.config/crush/skills/
+
+# Git is clean
+git status
 ```
-/briefing
-```
-
-If it returns a morning briefing with calendar, priorities, and financial pulse, the core system is working.
-
-Then test a domain-specific skill:
-
-```
-/second-brain review
-```
-
-Should run a vault health check against your Obsidian vault.
 
 ---
 
-## 9. Optional: CLAUDE.local.md
+## 9. Optional: AGENTS.local.md
 
-`CLAUDE.local.md` at the repo root is gitignored. Use it for machine-specific overrides -- local paths, personal API keys referenced by name, or dev environment notes that don't belong in the shared repo.
+For machine-specific overrides (local paths, dev notes that don't belong in the shared repo):
+
+```bash
+echo "# Local Overrides" > AGENTS.local.md
+# AGENTS.local.md is gitignored
+```
+
+---
+
+## Git Conventions
+
+All commits must follow conventional commits format:
+```
+<type>(<scope>): <description>
+
+feat(second-brain): add tag audit workflow
+fix(project-init): correct vault path reference
+docs: update setup SOP for Crush
+chore: update context files for Q2
+```
+
+Types: `feat`, `fix`, `docs`, `refactor`, `chore`, `style`, `test`, `build`, `ci`, `perf`
+
+Never append Co-Authored-By trailers. Use worktrees for parallel branches.
+
+---
+
+## Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| `crush: command not found` | Install via Homebrew, check PATH |
+| `obsidian: command not found` | Install obsidian-cli, check PATH |
+| `obsidian "The Forge"` fails | Open Obsidian Desktop first, enable CLI in Settings |
+| Vault notes not showing | Obsidian Desktop must be running for CLI IPC |
+| API key errors | Check `ANTHROPIC_API_KEY` is exported in shell |
 
 ---
 
@@ -157,8 +179,8 @@ Should run a vault health check against your Obsidian vault.
 
 | When | Action |
 |------|--------|
-| Add a new root-level skill | Run the `ln -sf` command from Step 4 |
 | Priorities shift | Update `context/current-priorities.md` |
 | Start a new quarter | Update `context/goals.md` |
-| Make a significant decision | Append to `decisions/log.md` |
-| Add a new domain | Follow domain creation pattern in `CLAUDE.md`; add MCP servers to root `.mcp.json` |
+| New W2 role or stack change | Update `context/work.md` |
+| Significant decision | Append to `decisions/log.md` |
+| Build a new skill | Run `/skill-builder build <name>` |
