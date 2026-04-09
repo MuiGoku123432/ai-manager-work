@@ -16,6 +16,7 @@ Standards and conventions for "The Mind" Obsidian vault.
 | `50-Daily/` | Periodic notes | Daily notes, weekly reviews, monthly/quarterly reflections |
 | `60-Templates/` | Note templates | Templates for all note types |
 | `70-Atlas/` | Maps of Content | MOCs, index notes, dashboards |
+| `80-Lab/` | Ideas and research | Crazy ideas, random thoughts, shower thoughts, deep research dives |
 
 ## Naming Conventions
 
@@ -134,6 +135,9 @@ year: YYYY
 - `#fleeting` — quick capture, needs processing
 - `#permanent` — distilled, evergreen note
 - `#literature` — from a specific source
+- `#idea` — wild idea, half-baked concept, "what if" thinking (80-Lab)
+- `#research` — deep research dive or investigation (80-Lab)
+- `#thought` — random observation or shower thought (80-Lab)
 
 ### Habit Tags (for daily notes)
 - `#habit/exercise`

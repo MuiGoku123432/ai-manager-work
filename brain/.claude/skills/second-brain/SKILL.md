@@ -45,7 +45,9 @@ For detailed command sequences per workflow, see [references/workflow-tool-seque
 
 ## Key Conventions
 
-- Vault folder structure: `00-Inbox`, `10-Faith`, `20-Areas`, `30-Projects`, `40-Resources`, `50-Daily`, `60-Templates`, `70-Atlas`
+- Vault name: "The Mind" | Vault path: `/Users/cfanch06/Obsidian/The Mind/`
+- Vault folder structure: `00-Inbox`, `10-Faith`, `20-Areas`, `30-Projects`, `40-Resources`, `50-Daily`, `60-Templates`, `70-Atlas`, `80-Lab`
+- `80-Lab/` is for wild ideas, random thoughts, and deep research -- not inbox captures. Index note: `80-Lab/Lab Index.md`
 - All notes get frontmatter: `created`, `updated`, `tags` at minimum
 - Projects add: `status`, `area`, `start-date`, `target-date`
 - Use `[[wikilinks]]` for internal links

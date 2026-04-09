@@ -31,10 +31,12 @@ You follow the **WAT framework** (Workflows, Agents, Tools):
 This repo is organized into independent domains, each with scoped MCP servers, skills, and agents:
 
 ```
-finances/    -- Monarch Money MCP, financial advisor skill + agents
-real-estate/ -- RentCast + REICalc MCP, property advisor skill + agents
-brain/       -- Obsidian CLI, second-brain skill for vault management
-calendar/    -- Apple Calendar + Reminders via AppleScript automation
+finances/             -- Monarch Money MCP, financial advisor skill + agents
+real-estate/          -- RentCast + REICalc MCP, property advisor skill + agents
+brain/                -- Obsidian CLI, second-brain skill for vault management
+calendar/             -- Apple Calendar + Reminders via AppleScript automation
+project-initializer/  -- Project bootstrap system, obsidian CLI for vault wiring
+recursive-research/   -- WebSearch + WebFetch, Karpathy-style ratchet research loop
 ```
 
 **Cross-domain orchestration:** The root `.mcp.json` aggregates all domain MCP servers. Launching from the project root gives access to everything. Launching from a subdomain gives scoped access. Domain-level `CLAUDE.md` files take precedence within their directory.
@@ -63,6 +65,8 @@ Skills are the user-facing entry points. Root-level skills are always available.
 |-------|---------|
 | `/briefing` | Daily morning briefing -- calendar, focus items, financial pulse, approaching deadlines |
 | `/review` | Cross-domain orchestrator -- weekly digest, monthly deep-dive, or quick status across all domains |
+| `/project-init` | Bootstrap new projects -- research, vet, plan, scaffold, wire to Obsidian |
+| `/recursive-research` | Deep autonomous research -- iterative ratchet loop, living wiki, Obsidian export |
 | `/skill-builder` | Build or audit Claude Code skills |
 | `/agent-builder` | Build or audit a single agent definition |
 | `/team-builder` | Build or audit a full lead+specialist agent team |
@@ -81,7 +85,6 @@ Skills are the user-facing entry points. Root-level skills are always available.
 - Sentinovo test run reports -- structured summary after each pipeline run
 - ASU assignment template -- prompt in, structured academic response out
 - The Narrow Road episode brief -- location + theme + gospel angle = full outline
-- Research synthesis -- deep research on a topic, structured deliverable out
 
 ## Agent Teams
 
@@ -95,6 +98,9 @@ Each domain has a hub-and-spoke agent team. The lead agent is the entry point; s
 | real-estate | -- | -- | `investment-analyst`, `risk-assessor` | sonnet |
 | calendar | `schedule-manager` | haiku | `reminder-assistant` | haiku |
 | brain | *(no team -- use `/second-brain` skill)* | -- | -- | -- |
+| project-initializer | `init-lead` | sonnet | `research-scout`, `scaffold-agent` | haiku |
+| recursive-research | `research-lead` | sonnet | `search-agent` | haiku |
+| recursive-research | -- | -- | `synthesis-agent` | sonnet |
 
 **Orchestration pattern:** From the project root, spawn domain agents as subagents for parallel cross-domain work. Always pass the recommended model when spawning -- it keeps token costs low without sacrificing quality. Example: spawn `financial-reviewer` (sonnet) and `schedule-manager` (haiku) simultaneously to cross-reference financial milestones with calendar availability.
 
