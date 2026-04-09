@@ -26,7 +26,38 @@ cd ~/repos/mine/ai-projects
 
 ---
 
-## 3. Symlink Global Skills
+## 3. Git Configuration
+
+The repo enforces conventional commits and git worktrees via `.claude/rules/git-conventions.md` -- Claude Code loads this automatically. No manual setup needed for Claude to follow these rules, but understand the workflow:
+
+**Conventional commit format:**
+```
+<type>(<scope>): <description>
+
+feat(brain): add 80-lab folder support
+fix(project-init): correct obsidian create flag
+docs: update new-machine-setup SOP
+chore: bump context files for Q2
+```
+
+Types: `feat`, `fix`, `docs`, `refactor`, `chore`, `style`, `test`, `build`, `ci`, `perf`
+
+**Git worktrees** -- for parallel branches without stashing:
+```bash
+# Create a worktree for a feature branch
+git worktree add ../ai-projects-<feature> -b <branch-name>
+
+# List worktrees
+git worktree list
+
+# Remove when done
+git worktree remove ../ai-projects-<feature>
+git branch -d <branch-name>
+```
+
+---
+
+## 4. Symlink Global Skills
 
 Makes all root-level skills available from any project on the device -- not just when launched from this repo.
 
@@ -57,7 +88,7 @@ ln -sf ~/repos/mine/ai-projects/.claude/skills/<skill-name>/ ~/.claude/skills/<s
 
 ---
 
-## 4. Configure MCP Servers
+## 5. Configure MCP Servers
 
 Each domain that uses an MCP server needs credentials or environment variables. Set these up before using that domain.
 
@@ -72,7 +103,7 @@ Update the vault path in `brain/CLAUDE.md` and `brain/.claude/skills/second-brai
 
 ---
 
-## 5. Configure obsidian-cli Plugin
+## 6. Configure obsidian-cli Plugin
 
 The `brain/` and `project-initializer/` domains require the obsidian-cli Claude Code plugin. Verify it's enabled:
 
@@ -85,7 +116,7 @@ If the plugin isn't installed, follow the obsidian-cli repo setup instructions t
 
 ---
 
-## 6. Update Context Files
+## 7. Update Context Files
 
 These files drive prioritization and goal-setting across all domains. Update them to reflect your current situation:
 
@@ -96,7 +127,7 @@ These files drive prioritization and goal-setting across all domains. Update the
 
 ---
 
-## 7. Verify the Setup
+## 8. Verify the Setup
 
 From the repo root, start a Claude Code session and run:
 
@@ -116,7 +147,7 @@ Should run a vault health check against your Obsidian vault.
 
 ---
 
-## 8. Optional: CLAUDE.local.md
+## 9. Optional: CLAUDE.local.md
 
 `CLAUDE.local.md` at the repo root is gitignored. Use it for machine-specific overrides -- local paths, personal API keys referenced by name, or dev environment notes that don't belong in the shared repo.
 
@@ -126,7 +157,7 @@ Should run a vault health check against your Obsidian vault.
 
 | When | Action |
 |------|--------|
-| Add a new root-level skill | Run the `ln -sf` command from Step 3 |
+| Add a new root-level skill | Run the `ln -sf` command from Step 4 |
 | Priorities shift | Update `context/current-priorities.md` |
 | Start a new quarter | Update `context/goals.md` |
 | Make a significant decision | Append to `decisions/log.md` |

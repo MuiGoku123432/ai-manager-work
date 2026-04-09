@@ -245,6 +245,25 @@ ln -sf /Users/cfanch06/repos/mine/ai-projects/.claude/skills/<skill-name>/ ~/.cl
 
 ---
 
+## Git Conventions
+
+All commits in this repo follow conventional commits format. No `Co-Authored-By` trailers. Git worktrees are preferred for parallel branch work.
+
+Full rules and command reference: `.claude/rules/git-conventions.md` at the repo root.
+
+**Quick reference:**
+```
+feat(domain): add new capability
+fix(domain): correct broken behavior
+docs: update reference file
+chore: update context or config
+refactor(domain): restructure without behavior change
+```
+
+When scaffolding a new project that will be in this repo, these conventions apply immediately.
+
+---
+
 ## Naming Conventions Summary
 
 | Item | Convention | Example |
